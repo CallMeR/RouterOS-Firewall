@@ -125,6 +125,7 @@ add action=drop chain=bad_tcp comment="defconf: tcp-flags=rst,urg" protocol=tcp 
 add action=drop chain=bad_tcp comment="defconf: TCP port 0 drop" port=0 protocol=tcp
 
 add action=drop chain=icmp4 comment="Access To Modem" protocol=icmp in-interface-list=MODEM log=yes
+add action=drop chain=icmp4 comment="defconf: drop from WAN" protocol=icmp in-interface-list=WAN
 
 add action=accept chain=icmp4 comment="defconf: echo reply" icmp-options=0:0 limit=5,10:packet protocol=icmp
 add action=accept chain=icmp4 comment="defconf: net unreachable" icmp-options=3:0 protocol=icmp
@@ -142,4 +143,3 @@ add action=drop chain=prerouting dst-address-list=ddos-target src-address-list=d
 /ip settings
 
 set tcp-syncookies=yes
-
