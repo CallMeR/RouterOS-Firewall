@@ -132,14 +132,19 @@ add action=accept chain=icmp4 comment="wanconf: Accept time exceeded from WAN" i
 add action=accept chain=icmp4 comment="wanconf: Accept net unreachable from WAN" icmp-options=3:0 protocol=icmp in-interface-list=WAN
 add action=drop chain=icmp4 comment="wanconf: Drop other icmp from WAN" protocol=icmp in-interface-list=WAN
 
-add action=accept chain=icmp4 comment="defconf: echo reply" icmp-options=0:0 limit=5,10:packet protocol=icmp in-interface-list=LAN
+add action=accept chain=icmp4 comment="defconf: echo reply" icmp-options=0:0 limit=5,10:packet protocol=icmp in-interface-list=LAN log=yes
 add action=accept chain=icmp4 comment="defconf: net unreachable" icmp-options=3:0 protocol=icmp in-interface-list=LAN
 add action=accept chain=icmp4 comment="defconf: host unreachable" icmp-options=3:1 protocol=icmp in-interface-list=LAN
 add action=accept chain=icmp4 comment="defconf: protocol unreachable" icmp-options=3:2 protocol=icmp in-interface-list=LAN
 add action=accept chain=icmp4 comment="defconf: port unreachable" icmp-options=3:3 protocol=icmp in-interface-list=LAN
 add action=accept chain=icmp4 comment="defconf: fragmentation needed" icmp-options=3:4 protocol=icmp in-interface-list=LAN
-add action=accept chain=icmp4 comment="defconf: echo" icmp-options=8:0 limit=5,10:packet protocol=icmp in-interface-list=LAN
-add action=accept chain=icmp4 comment="defconf: time exceeded " icmp-options=11:0-255 protocol=icmp in-interface-list=LAN
+
+add action=accept chain=icmp4 comment="defconf: echo to Modem" icmp-options=8:0 limit=5,10:packet protocol=icmp in-interface-list=LAN dst-address-list=modem_address
+add action=accept chain=icmp4 comment="defconf: echo to Local Device" icmp-options=8:0 limit=5,10:packet protocol=icmp in-interface-list=LAN dst-address-list=home_address
+add action=drop chain=icmp4 comment="defconf: echo to Not Global" icmp-options=8:0 limit=5,10:packet protocol=icmp in-interface-list=LAN dst-address-list=not_global_ipv4
+add action=accept chain=icmp4 comment="defconf: echo to WAN" icmp-options=8:0 limit=5,10:packet protocol=icmp in-interface-list=LAN
+
+add action=accept chain=icmp4 comment="defconf: time exceeded" icmp-options=11:0-255 protocol=icmp in-interface-list=LAN
 
 add action=drop chain=icmp4 comment="defconf: drop all other icmp" protocol=icmp
 
@@ -149,3 +154,4 @@ add action=drop chain=prerouting dst-address-list=ddos-target src-address-list=d
 /ip settings
 
 set tcp-syncookies=yes
+
