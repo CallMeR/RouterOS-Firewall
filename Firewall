@@ -54,6 +54,12 @@ add comment="defconf: DDoS" list=ddos-target
 
 /ip firewall filter
 
+add action=jump chain=forward connection-state=new jump-target=detect-ddos comment="defconf: DDoS"
+add action=return chain=detect-ddos dst-limit=32,32,src-and-dst-addresses/10s comment="defconf: DDoS"
+add action=add-dst-to-address-list address-list=ddos-target address-list-timeout=10m chain=detect-ddos comment="defconf: DDoS" log=yes
+add action=add-src-to-address-list address-list=ddos-attackers address-list-timeout=10m chain=detect-ddos comment="defconf: DDoS" log=yes
+add action=return chain=detect-ddos dst-limit=32,32,src-and-dst-addresses/10s protocol=tcp tcp-flags=syn,ack comment="defconf: DDoS"
+
 add action=accept chain=input comment="defconf: accept ICMP after RAW" protocol=icmp
 add action=accept chain=input comment="defconf: accept established,related,untracked" connection-state=established,related,untracked
 add action=drop chain=input comment="defconf: drop all not coming from LAN" in-interface-list=!LAN
@@ -64,11 +70,6 @@ add action=drop chain=forward comment="defconf: drop invalid" connection-state=i
 add action=drop chain=forward comment="defconf: drop all from WAN not DSTNATed" connection-nat-state=!dstnat connection-state=new in-interface-list=WAN log=yes
 add action=drop chain=forward src-address-list=no_forward_ipv4 comment="defconf: drop bad forward IPs"
 add action=drop chain=forward dst-address-list=no_forward_ipv4 comment="defconf: drop bad forward IPs"
-
-add action=return chain=detect-ddos dst-limit=32,32,src-and-dst-addresses/10s comment="defconf: DDoS"
-add action=add-dst-to-address-list address-list=ddos-target address-list-timeout=10m chain=detect-ddos comment="defconf: DDoS" log=yes
-add action=add-src-to-address-list address-list=ddos-attackers address-list-timeout=10m chain=detect-ddos comment="defconf: DDoS" log=yes
-add action=return chain=detect-ddos dst-limit=32,32,src-and-dst-addresses/10s protocol=tcp tcp-flags=syn,ack comment="defconf: DDoS"
 
 
 /ip firewall nat
@@ -93,6 +94,9 @@ add action=accept chain=prerouting src-address-list=home_address dst-address-lis
 /ip firewall raw
 
 add action=accept chain=prerouting comment="defconf: enable for transparent firewall" disabled=yes
+
+add action=drop chain=prerouting dst-address-list=ddos-target src-address-list=ddos-attackers comment="defconf: DDoS"
+
 add action=accept chain=prerouting comment="defconf: accept DHCP discover" dst-address=255.255.255.255 dst-port=67 in-interface-list=LAN protocol=udp src-address=0.0.0.0 src-port=68
 
 add action=drop chain=prerouting comment="defconf: drop bogon IP's" src-address-list=bad_ipv4
@@ -143,14 +147,11 @@ add action=accept chain=icmp4 comment="defconf: echo to Modem" icmp-options=8:0 
 add action=accept chain=icmp4 comment="defconf: echo to Local Device" icmp-options=8:0 limit=5,10:packet protocol=icmp in-interface-list=LAN dst-address-list=home_address
 add action=drop chain=icmp4 comment="defconf: echo to Not Global" icmp-options=8:0 limit=5,10:packet protocol=icmp in-interface-list=LAN dst-address-list=not_global_ipv4
 add action=accept chain=icmp4 comment="defconf: echo to WAN" icmp-options=8:0 limit=5,10:packet protocol=icmp in-interface-list=LAN
-
 add action=accept chain=icmp4 comment="defconf: time exceeded" icmp-options=11:0-255 protocol=icmp in-interface-list=LAN
-
 add action=drop chain=icmp4 comment="defconf: drop all other icmp" protocol=icmp
-
-add action=drop chain=prerouting dst-address-list=ddos-target src-address-list=ddos-attackers comment="defconf: DDoS"
 
 
 /ip settings
 
 set tcp-syncookies=yes
+
