@@ -48,17 +48,17 @@ add address=255.255.255.255/32 comment="defconf: RFC6890" list=bad_src_ipv4
 add address=0.0.0.0/8 comment="defconf: RFC6890" list=bad_dst_ipv4
 add address=224.0.0.0/4 comment="defconf: RFC6890" list=bad_dst_ipv4
 
+add comment="defconf: DDoS" list=ddos-targets
 add comment="defconf: DDoS" list=ddos-attackers
-add comment="defconf: DDoS" list=ddos-target
 
 
 /ip firewall filter
 
 add action=jump chain=forward connection-state=new jump-target=detect-ddos comment="defconf: DDoS"
 add action=return chain=detect-ddos dst-limit=32,32,src-and-dst-addresses/10s comment="defconf: DDoS"
-add action=add-dst-to-address-list address-list=ddos-target address-list-timeout=10m chain=detect-ddos comment="defconf: DDoS" log=yes
-add action=add-src-to-address-list address-list=ddos-attackers address-list-timeout=10m chain=detect-ddos comment="defconf: DDoS" log=yes
-add action=return chain=detect-ddos dst-limit=32,32,src-and-dst-addresses/10s protocol=tcp tcp-flags=syn,ack comment="defconf: DDoS"
+add action=return chain=detect-ddos dst-limit=32,32,src-and-dst-addresses/10s protocol=tcp tcp-flags=syn,ack comment="defconf: SYN-ACK Flood" log=yes
+add action=add-dst-to-address-list chain=detect-ddos address-list=ddos-targets address-list-timeout=10m comment="defconf: DDoS" log=yes
+add action=add-src-to-address-list chain=detect-ddos address-list=ddos-attackers address-list-timeout=10m comment="defconf: DDoS" log=yes
 
 add action=accept chain=input comment="defconf: accept ICMP after RAW" protocol=icmp
 add action=accept chain=input comment="defconf: accept established,related,untracked" connection-state=established,related,untracked
@@ -95,7 +95,7 @@ add action=accept chain=prerouting src-address-list=home_address dst-address-lis
 
 add action=accept chain=prerouting comment="defconf: enable for transparent firewall" disabled=yes
 
-add action=drop chain=prerouting dst-address-list=ddos-target src-address-list=ddos-attackers comment="defconf: DDoS"
+add action=drop chain=prerouting dst-address-list=ddos-targets src-address-list=ddos-attackers comment="defconf: DDoS"
 
 add action=accept chain=prerouting comment="defconf: accept DHCP discover" dst-address=255.255.255.255 dst-port=67 in-interface-list=LAN protocol=udp src-address=0.0.0.0 src-port=68
 
