@@ -55,8 +55,8 @@ add comment="defconf: DDoS" list=ddos-attackers
 /ip firewall filter
 
 add action=jump chain=forward connection-state=new jump-target=detect-ddos comment="defconf: DDoS"
-add action=return chain=detect-ddos dst-limit=32,32,src-and-dst-addresses/10s comment="defconf: DDoS"
-add action=return chain=detect-ddos dst-limit=32,32,src-and-dst-addresses/10s protocol=tcp tcp-flags=syn,ack comment="defconf: SYN-ACK Flood" log=yes
+add action=return chain=detect-ddos dst-limit=64,64,src-and-dst-addresses/10s comment="defconf: DDoS"
+add action=return chain=detect-ddos dst-limit=64,64,src-and-dst-addresses/10s protocol=tcp tcp-flags=syn,ack comment="defconf: SYN-ACK Flood" log=yes
 add action=add-dst-to-address-list chain=detect-ddos address-list=ddos-targets address-list-timeout=10m comment="defconf: DDoS" log=yes
 add action=add-src-to-address-list chain=detect-ddos address-list=ddos-attackers address-list-timeout=10m comment="defconf: DDoS" log=yes
 
@@ -151,7 +151,17 @@ add action=accept chain=icmp4 comment="defconf: time exceeded" icmp-options=11:0
 add action=drop chain=icmp4 comment="defconf: drop all other icmp" protocol=icmp
 
 
-/ip settings
+/ip/settings/set tcp-syncookies=yes
 
-set tcp-syncookies=yes
+/ip/neighbor/discovery-settings/set discover-interface-list=none
+/ip/proxy/set enabled=no
+/ip/socks/set enabled=no
+/ip/upnp/set enabled=no
+/ip/cloud/set ddns-enabled=no update-time=no
+
+/tool/mac-server/set allowed-interface-list=none
+/tool/mac-server/mac-winbox/set allowed-interface-list=LAN
+/tool/mac-server/ping/set enabled=no
+
+/tool/bandwidth-server/set enabled=no
 
