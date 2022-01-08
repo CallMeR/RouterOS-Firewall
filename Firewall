@@ -13,8 +13,6 @@ add interface=ether1 list=MODEM comment="modemconf: Access To Modem"
 ##
 /ip firewall address-list
 
-add comment="wanconf: PPPoE Network" list=pppoe_network
-
 add address=192.168.100.0/24 comment="modemconf: Modem Address" list=modem_address
 add address=10.0.0.0/24 comment="lanconf: Home Address" list=home_address
 
@@ -57,8 +55,8 @@ add comment="defconf: DDoS" list=ddos_attackers
 /ip firewall filter
 
 add action=jump chain=forward connection-state=new jump-target=detect-ddos comment="defconf: DDoS"
-add action=return chain=detect-ddos dst-limit=64,64,src-and-dst-addresses/10s comment="defconf: DDoS"
-add action=return chain=detect-ddos dst-limit=64,64,src-and-dst-addresses/10s protocol=tcp tcp-flags=syn,ack comment="defconf: SYN-ACK Flood" log=yes
+add action=return chain=detect-ddos dst-limit=128,128,src-and-dst-addresses/10s comment="defconf: DDoS"
+add action=return chain=detect-ddos dst-limit=128,128,src-and-dst-addresses/10s protocol=tcp tcp-flags=syn,ack comment="defconf: SYN-ACK Flood" log=yes
 add action=add-dst-to-address-list chain=detect-ddos address-list=ddos_targets address-list-timeout=10m comment="defconf: DDoS" log=yes
 add action=add-src-to-address-list chain=detect-ddos address-list=ddos_attackers address-list-timeout=10m comment="defconf: DDoS" log=yes
 
@@ -105,8 +103,6 @@ add action=drop chain=prerouting comment="defconf: drop bogon IP's" src-address-
 add action=drop chain=prerouting comment="defconf: drop bogon IP's" dst-address-list=bad_ipv4
 add action=drop chain=prerouting comment="defconf: drop bogon IP's" src-address-list=bad_src_ipv4
 add action=drop chain=prerouting comment="defconf: drop bogon IP's" dst-address-list=bad_dst_ipv4
-
-add action=accept chain=prerouting comment="wanconf: accept from PPPoE Network" src-address-list=pppoe_network in-interface-list=WAN log=yes
 
 add action=drop chain=prerouting comment="defconf: drop non global from WAN" src-address-list=not_global_ipv4 in-interface-list=WAN log=yes
 add action=drop chain=prerouting comment="defconf: drop forward to local lan from WAN" in-interface-list=WAN dst-address-list=home_address log=yes
