@@ -55,8 +55,8 @@ add comment="defconf: DDoS" list=ddos_attackers
 /ip firewall filter
 
 add action=jump chain=forward connection-state=new jump-target=detect-ddos comment="defconf: DDoS"
-add action=return chain=detect-ddos dst-limit=128,128,src-and-dst-addresses/10s comment="defconf: DDoS"
-add action=return chain=detect-ddos dst-limit=128,128,src-and-dst-addresses/10s protocol=tcp tcp-flags=syn,ack comment="defconf: SYN-ACK Flood" log=yes
+add action=return chain=detect-ddos dst-limit=96,96,src-and-dst-addresses/10s comment="defconf: DDoS"
+add action=return chain=detect-ddos dst-limit=32,32,src-and-dst-addresses/10s protocol=tcp tcp-flags=syn,ack comment="defconf: SYN-ACK Flood" log=yes
 add action=add-dst-to-address-list chain=detect-ddos address-list=ddos_targets address-list-timeout=10m comment="defconf: DDoS" log=yes
 add action=add-src-to-address-list chain=detect-ddos address-list=ddos_attackers address-list-timeout=10m comment="defconf: DDoS" log=yes
 
@@ -164,3 +164,4 @@ add action=drop chain=icmp4 comment="defconf: drop all other icmp" protocol=icmp
 /tool/mac-server/ping/set enabled=no
 
 /tool/bandwidth-server/set enabled=no
+
