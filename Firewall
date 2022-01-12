@@ -77,10 +77,10 @@ add action=drop chain=forward dst-address-list=no_forward_ipv4 comment="defconf:
 add action=accept chain=srcnat comment="defconf: accept all that matches IPSec policy" ipsec-policy=out,ipsec disabled=yes
 add action=masquerade chain=srcnat comment="defconf: masquerade" out-interface-list=WAN
 
-add action=masquerade chain=srcnat out-interface-list=MODEM src-address-list=home_address dst-address-list=modem_address comment="modemconf: Access To Modem" log=yes
+add action=masquerade chain=srcnat out-interface-list=MODEM src-address-list=home_address dst-address-list=modem_address comment="modemconf: Access To Modem"
 
-add action=accept chain=dstnat dst-port=53 in-interface-list="LAN" protocol=udp src-address-list=home_dns_address log=yes comment="lanconf: Accept Local DNS Startup Query(UDP)"
-add action=accept chain=dstnat dst-port=53 in-interface-list="LAN" protocol=tcp src-address-list=home_dns_address log=yes comment="lanconf: Accept Local DNS Startup Query(TCP)"
+add action=accept chain=dstnat dst-port=53 in-interface-list="LAN" protocol=udp src-address-list=home_dns_address comment="lanconf: Accept Local DNS Startup Query(UDP)" log=yes
+add action=accept chain=dstnat dst-port=53 in-interface-list="LAN" protocol=tcp src-address-list=home_dns_address comment="lanconf: Accept Local DNS Startup Query(TCP)" log=yes
 
 add action=redirect chain=dstnat dst-address-list=!home_dns_address dst-port=53 in-interface-list="LAN" protocol=udp to-addresses=10.0.0.1 to-ports=53 comment="lanconf: DNS Redirect to DNS Server(UDP)"
 add action=redirect chain=dstnat dst-address-list=!home_dns_address dst-port=53 in-interface-list="LAN" protocol=tcp to-addresses=10.0.0.1 to-ports=53 comment="lanconf: DNS Redirect to DNS Server(TCP)"
@@ -114,8 +114,9 @@ add action=jump chain=prerouting comment="defconf: jump to TCP chain" jump-targe
 add action=accept chain=prerouting comment="defconf: accept everything else from LAN" in-interface-list=LAN
 add action=accept chain=prerouting comment="defconf: accept everything else from WAN" in-interface-list=WAN
 
-add action=accept chain=prerouting comment="modemconf: Access To Modem" protocol=tcp in-interface-list=MODEM src-address-list=modem_address
-add action=drop chain=prerouting comment="modemconf: Access To Modem" in-interface-list=MODEM log=yes
+add action=drop chain=prerouting comment="modemconf: Drop UDP To Modem" protocol=udp in-interface-list=LAN dst-address-list=modem_address log=yes
+add action=accept chain=prerouting comment="modemconf: Accept TCP From Modem" protocol=tcp in-interface-list=MODEM src-address-list=modem_address
+add action=drop chain=prerouting comment="modemconf: Drop Others From Modem" in-interface-list=MODEM log=yes
 
 add action=drop chain=prerouting comment="defconf: drop the rest" log=yes
 
