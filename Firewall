@@ -147,8 +147,6 @@ add action=drop chain=icmp4 comment="defconf: drop all other icmp" protocol=icmp
 
 add action=accept chain=modem comment="modemconf: echo to Modem" icmp-options=8:0 limit=5,10:packet protocol=icmp in-interface-list=LAN
 add action=accept chain=modem comment="modemconf: Accept echo reply from Modem" icmp-options=0:0 limit=5,10:packet protocol=icmp in-interface-list=MODEM
-add action=drop chain=modem comment="modemconf: Drop other icmp from LAN" protocol=icmp in-interface-list=LAN log=yes
-add action=drop chain=modem comment="modemconf: Drop other icmp from Modem" protocol=icmp in-interface-list=MODEM log=yes
 add action=accept chain=modem comment="modemconf: Accept TCP to Modem" protocol=tcp in-interface-list=LAN
 add action=accept chain=modem comment="modemconf: Accept TCP From Modem" protocol=tcp in-interface-list=MODEM src-address-list=modem_address
 add action=drop chain=modem comment="modemconf: Drop Others To Modem" in-interface-list=LAN log=yes
