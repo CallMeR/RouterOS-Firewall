@@ -68,6 +68,7 @@ add action=fasttrack-connection chain=forward comment="defconf: fasttrack" conne
 add action=accept chain=forward comment="defconf: accept established,related, untracked" connection-state=established,related,untracked
 add action=drop chain=forward comment="defconf: drop invalid" connection-state=invalid
 add action=drop chain=forward comment="defconf: drop all from WAN not DSTNATed" connection-nat-state=!dstnat connection-state=new in-interface-list=WAN log=yes
+add action=drop chain=forward comment="modemconf: drop all from MODEM not DSTNATed" connection-nat-state=!dstnat connection-state=new in-interface-list=MODEM log=yes
 add action=drop chain=forward src-address-list=no_forward_ipv4 comment="defconf: drop bad forward IPs"
 add action=drop chain=forward dst-address-list=no_forward_ipv4 comment="defconf: drop bad forward IPs"
 
@@ -166,5 +167,3 @@ add action=drop chain=modem comment="modemconf: Drop Others From Modem" in-inter
 /tool/mac-server/ping/set enabled=no
 
 /tool/bandwidth-server/set enabled=no
-
-
