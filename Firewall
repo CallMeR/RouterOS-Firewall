@@ -54,12 +54,6 @@ add comment="defconf: DDoS" list=ddos_attackers
 
 /ip firewall filter
 
-add action=jump chain=forward connection-state=new jump-target=detect-ddos comment="defconf: DDoS"
-add action=return chain=detect-ddos dst-limit=32,64,src-and-dst-addresses/10s comment="defconf: DDoS"
-add action=return chain=detect-ddos dst-limit=32,32,src-and-dst-addresses/10s protocol=tcp tcp-flags=syn,ack comment="defconf: SYN-ACK Flood" log=yes
-add action=add-dst-to-address-list chain=detect-ddos address-list=ddos_targets address-list-timeout=10m comment="defconf: DDoS" log=yes
-add action=add-src-to-address-list chain=detect-ddos address-list=ddos_attackers address-list-timeout=10m comment="defconf: DDoS" log=yes
-
 add action=accept chain=input comment="defconf: accept ICMP after RAW" protocol=icmp
 add action=accept chain=input comment="defconf: accept established,related,untracked" connection-state=established,related,untracked
 add action=drop chain=input comment="defconf: drop all not coming from LAN" in-interface-list=!LAN
@@ -71,6 +65,12 @@ add action=drop chain=forward comment="defconf: drop all from WAN not DSTNATed" 
 add action=drop chain=forward comment="modemconf: drop all from MODEM not DSTNATed" connection-nat-state=!dstnat connection-state=new in-interface-list=MODEM log=yes
 add action=drop chain=forward src-address-list=no_forward_ipv4 comment="defconf: drop bad forward IPs"
 add action=drop chain=forward dst-address-list=no_forward_ipv4 comment="defconf: drop bad forward IPs"
+
+add action=jump chain=forward connection-state=new jump-target=detect-ddos comment="defconf: DDoS"
+add action=return chain=detect-ddos dst-limit=32,32,src-and-dst-addresses/10s comment="defconf: DDoS"
+add action=return chain=detect-ddos dst-limit=32,32,src-and-dst-addresses/10s protocol=tcp tcp-flags=syn,ack comment="defconf: SYN-ACK Flood" log=yes
+add action=add-dst-to-address-list chain=detect-ddos address-list=ddos_targets address-list-timeout=10m comment="defconf: DDoS" log=yes
+add action=add-src-to-address-list chain=detect-ddos address-list=ddos_attackers address-list-timeout=10m comment="defconf: DDoS" log=yes
 
 
 /ip firewall nat
