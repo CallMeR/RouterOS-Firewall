@@ -1,16 +1,19 @@
-##
+## Define Interface List
+
 /interface list
 add name=WAN comment="defconf: Connect To Global"
 add name=LAN comment="defconf: Local Bridge"
 add name=MODEM comment="modemconf: Access To Modem"
 
-##
+## Define List Member
+
 /interface list member
 add interface=pppoe-out1 list=WAN comment="defconf: Connect To Global"
 add interface=bridge1 list=LAN comment="defconf: Local Bridge"
 add interface=ether1 list=MODEM comment="modemconf: Access To Modem"
 
-##
+## Define Firewall Rules
+
 /ip firewall address-list
 
 add address=192.168.100.1 comment="modemconf: Modem Address" list=modem_address
@@ -166,3 +169,4 @@ add action=drop chain=icmp4 comment="defconf: drop all other icmp" protocol=icmp
 /tool/mac-server/ping/set enabled=no
 
 /tool/bandwidth-server/set enabled=no
+
