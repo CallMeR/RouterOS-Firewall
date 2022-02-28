@@ -93,6 +93,8 @@ add action=redirect chain=dstnat dst-address-list=!home_dns_address dst-port=53 
 /ip firewall mangle
 
 add action=accept chain=prerouting src-address-list=home_address dst-address-list=modem_address comment="modemconf: Access To Modem"
+add action=mark-packet chain=prerouting in-interface-list=WAN new-packet-mark=QoS-Download comment="Mark packet for QoS (Download)" 
+add action=mark-packet chain=postrouting out-interface-list=WAN new-packet-mark=QoS-Upload comment="Mark packet for QoS (Upload)"
 
 
 /ip firewall raw
@@ -169,4 +171,3 @@ add action=drop chain=icmp4 comment="defconf: drop all other icmp" protocol=icmp
 /tool/mac-server/ping/set enabled=no
 
 /tool/bandwidth-server/set enabled=no
-
