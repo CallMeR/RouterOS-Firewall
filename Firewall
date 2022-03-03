@@ -70,8 +70,8 @@ add action=drop chain=forward src-address-list=no_forward_ipv4 comment="defconf:
 add action=drop chain=forward dst-address-list=no_forward_ipv4 comment="defconf: drop bad forward IPs"
 
 add action=jump chain=forward connection-state=new jump-target=detect-ddos comment="defconf: DDoS"
-add action=return chain=detect-ddos dst-limit=32,32,src-and-dst-addresses/10s comment="defconf: DDoS"
 add action=return chain=detect-ddos dst-limit=32,32,src-and-dst-addresses/10s protocol=tcp tcp-flags=syn,ack comment="defconf: SYN-ACK Flood" log=yes
+add action=return chain=detect-ddos dst-limit=32,32,src-and-dst-addresses/10s comment="defconf: DDoS"
 add action=add-dst-to-address-list chain=detect-ddos address-list=ddos_targets address-list-timeout=10m comment="defconf: DDoS" log=yes
 add action=add-src-to-address-list chain=detect-ddos address-list=ddos_attackers address-list-timeout=10m comment="defconf: DDoS" log=yes
 
