@@ -93,8 +93,6 @@ add action=redirect chain=dstnat dst-address-list=!home_dns_address dst-port=53 
 /ip firewall mangle
 
 add action=accept chain=prerouting src-address-list=home_address dst-address-list=modem_address comment="modemconf: Access To Modem"
-add action=mark-packet chain=prerouting in-interface-list=WAN new-packet-mark=QoS-Download comment="Mark packet for QoS (Download)" 
-add action=mark-packet chain=postrouting out-interface-list=WAN new-packet-mark=QoS-Upload comment="Mark packet for QoS (Upload)"
 
 
 /ip firewall raw
@@ -171,3 +169,48 @@ add action=drop chain=icmp4 comment="defconf: drop all other icmp" protocol=icmp
 /tool/mac-server/ping/set enabled=no
 
 /tool/bandwidth-server/set enabled=no
+
+
+## QoS With Cake
+
+/ip firewall mangle
+
+add action=mark-connection chain=prerouting new-connection-mark=Conn passthrough=yes src-address-list=home_address comment="QoS: mark-new-connection"
+add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-tcp-smaller packet-size=0-256 passthrough=yes protocol=tcp comment="QoS: mark-pack-tcp-smaller"
+add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-tcp-small packet-size=257-512 passthrough=yes protocol=tcp comment="QoS: mark-pack-tcp-small"
+add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-tcp-normal packet-size=513-1024 passthrough=yes protocol=tcp comment="QoS: mark-pack-tcp-normal"
+add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-tcp-big packet-size=1025-65535 passthrough=yes protocol=tcp comment="QoS: mark-pack-tcp-big"
+add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-udp-smaller packet-size=0-256 passthrough=yes protocol=udp comment="QoS: mark-pack-udp-smaller"
+add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-udp-small packet-size=257-512 passthrough=yes protocol=udp comment="QoS: mark-pack-udp-small"
+add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-udp-normal packet-size=513-1024 passthrough=yes protocol=udp comment="QoS: mark-pack-udp-normal"
+add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-udp-big packet-size=1025-65535 passthrough=yes protocol=udp comment="QoS: mark-pack-udp-big"
+add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-icmp passthrough=yes protocol=icmp comment="QoS: mark-pack-icmp"
+
+
+/queue tree
+
+add max-limit=500M name=queue-download parent=bridge1 queue=CakeHome comment="QoS: cake-total-queue-download"
+add max-limit=50M name=queue-upload parent=pppoe-out1 queue=CakeHome comment="QoS: cake-total-queue-upload"
+
+add name=queue-download-icmp packet-mark=pack-icmp parent=queue-download priority=2 queue=CakeHome comment="QoS: queue-download-icmp"
+add name=queue-download-tcp parent=queue-download queue=CakeHome comment="QoS: queue-download-tcp"
+add name=queue-download-udp parent=queue-download priority=7 queue=CakeHome comment="QoS: queue-download-udp"
+add name=queue-download-tcp-small packet-mark=pack-tcp-small parent=queue-download-tcp priority=4 queue=CakeHome comment="QoS: queue-download-tcp-small"
+add name=queue-download-tcp-normal packet-mark=pack-tcp-normal parent=queue-download-tcp priority=6 queue=CakeHome comment="QoS: queue-download-tcp-normal"
+add name=queue-download-tcp-big packet-mark=pack-tcp-big parent=queue-download-tcp queue=CakeHome comment="QoS: queue-download-tcp-big"
+add name=queue-download-udp-small packet-mark=pack-udp-small parent=queue-download-udp priority=3 queue=CakeHome comment="QoS: queue-download-udp-small"
+add name=queue-download-udp-normal packet-mark=pack-udp-normal parent=queue-download-udp priority=5 queue=CakeHome comment="QoS: queue-download-udp-normal"
+add name=queue-download-udp-big packet-mark=pack-udp-big parent=queue-download-udp priority=7 queue=CakeHome comment="QoS: queue-download-udp-big"
+add name=queue-upload-icmp packet-mark=pack-icmp parent=queue-upload priority=2 queue=CakeHome comment="QoS: queue-upload-icmp"
+add name=queue-upload-tcp parent=queue-upload queue=CakeHome comment="QoS: queue-upload-tcp"
+add name=queue-upload-udp parent=queue-upload priority=7 queue=CakeHome comment="QoS: queue-upload-udp"
+add name=queue-upload-tcp-small packet-mark=pack-tcp-small parent=queue-upload-tcp priority=4 queue=CakeHome comment="QoS: queue-upload-tcp-small"
+add name=queue-upload-tcp-normal packet-mark=pack-tcp-normal parent=queue-upload-tcp priority=6 queue=CakeHome comment="QoS: queue-upload-tcp-normal"
+add name=queue-upload-tcp-big packet-mark=pack-tcp-big parent=queue-upload-tcp queue=CakeHome comment="QoS: queue-upload-tcp-big"
+add name=queue-upload-udp-small packet-mark=pack-udp-small parent=queue-upload-udp priority=3 queue=CakeHome comment="QoS: queue-upload-udp-small"
+add name=queue-upload-udp-normal packet-mark=pack-udp-normal parent=queue-upload-udp priority=5 queue=CakeHome comment="QoS: queue-upload-udp-normal"
+add name=queue-upload-udp-big packet-mark=pack-udp-big parent=queue-upload-udp priority=7 queue=CakeHome comment="QoS: queue-upload-udp-big"
+add name=queue-download-tcp-smaller packet-mark=pack-tcp-smaller parent=queue-download-tcp priority=2 queue=CakeHome comment="QoS: queue-download-tcp-smaller"
+add name=queue-download-udp-smaller packet-mark=pack-udp-smaller parent=queue-download-udp priority=1 queue=CakeHome comment="QoS: queue-download-udp-smaller"
+add name=queue-upload-tcp-smaller packet-mark=pack-tcp-smaller parent=queue-upload-tcp priority=2 queue=CakeHome comment="QoS: queue-upload-tcp-smaller"
+add name=queue-upload-udp-smaller packet-mark=pack-udp-smaller parent=queue-upload-udp priority=1 queue=CakeHome comment="QoS: queue-upload-udp-smaller"
