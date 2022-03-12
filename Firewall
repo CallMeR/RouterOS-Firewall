@@ -185,6 +185,8 @@ add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-u
 add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-udp-big packet-size=1025-65535 passthrough=yes protocol=udp comment="QoS: mark-pack-udp-big"
 add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-icmp passthrough=yes protocol=icmp comment="QoS: mark-pack-icmp"
 
+/queue type
+add fq-codel-quantum=1000 kind=fq-codel name=FqCoDelHome
 
 /queue tree
 add max-limit=500M name=queue-download parent=bridge1 queue=FqCoDelHome comment="QoS: FqCoDel-total-queue-download"
