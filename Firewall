@@ -171,7 +171,7 @@ add action=drop chain=icmp4 comment="defconf: drop all other icmp" protocol=icmp
 /tool/bandwidth-server/set enabled=no
 
 
-## QoS With Fq_CoDel
+## QoS With CAKE
 
 /ip firewall mangle
 add action=mark-connection chain=prerouting new-connection-mark=Conn passthrough=yes src-address-list=home_address comment="QoS: mark-connection"
@@ -186,36 +186,38 @@ add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-u
 add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-icmp passthrough=yes protocol=icmp comment="QoS: mark-pack-icmp"
 
 /queue type
-add fq-codel-quantum=1000 kind=fq-codel name=FqCoDelHome
+add cake-bandwidth=500M cake-diffserv=diffserv4 cake-mpu=84 cake-nat=yes cake-overhead=38 cake-overhead-scheme=ethernet cake-wash=yes kind=cake name=CakeHome
 
 /queue tree
-add max-limit=500M name=queue-download parent=bridge1 queue=FqCoDelHome comment="QoS: FqCoDel-total-queue-download"
-add max-limit=50M name=queue-upload parent=pppoe-out1 queue=FqCoDelHome comment="QoS: FqCoDel-total-queue-upload"
+add max-limit=500M name=queue-download parent=bridge1 queue=CakeHome comment="QoS: CAKE-total-queue-download"
+add max-limit=50M name=queue-upload parent=pppoe-out1 queue=CakeHome comment="QoS: CAKE-total-queue-upload"
 
-add name=queue-download-icmp packet-mark=pack-icmp parent=queue-download priority=2 queue=FqCoDelHome comment="QoS: queue-download-icmp"
-add name=queue-download-tcp parent=queue-download queue=FqCoDelHome comment="QoS: queue-download-tcp"
-add name=queue-download-udp parent=queue-download priority=7 queue=FqCoDelHome comment="QoS: queue-download-udp"
+add name=queue-download-icmp packet-mark=pack-icmp parent=queue-download priority=2 queue=CakeHome comment="QoS: queue-download-icmp"
+add name=queue-download-tcp parent=queue-download queue=CakeHome comment="QoS: queue-download-tcp"
+add name=queue-download-udp parent=queue-download priority=7 queue=CakeHome comment="QoS: queue-download-udp"
 
-add name=queue-download-tcp-smaller packet-mark=pack-tcp-smaller parent=queue-download-tcp priority=2 queue=FqCoDelHome comment="QoS: queue-download-tcp-smaller"
-add name=queue-download-tcp-small packet-mark=pack-tcp-small parent=queue-download-tcp priority=4 queue=FqCoDelHome comment="QoS: queue-download-tcp-small"
-add name=queue-download-tcp-normal packet-mark=pack-tcp-normal parent=queue-download-tcp priority=6 queue=FqCoDelHome comment="QoS: queue-download-tcp-normal"
-add name=queue-download-tcp-big packet-mark=pack-tcp-big parent=queue-download-tcp queue=FqCoDelHome comment="QoS: queue-download-tcp-big"
+add name=queue-download-tcp-smaller packet-mark=pack-tcp-smaller parent=queue-download-tcp priority=2 queue=CakeHome comment="QoS: queue-download-tcp-smaller"
+add name=queue-download-tcp-small packet-mark=pack-tcp-small parent=queue-download-tcp priority=4 queue=CakeHome comment="QoS: queue-download-tcp-small"
+add name=queue-download-tcp-normal packet-mark=pack-tcp-normal parent=queue-download-tcp priority=6 queue=CakeHome comment="QoS: queue-download-tcp-normal"
+add name=queue-download-tcp-big packet-mark=pack-tcp-big parent=queue-download-tcp queue=CakeHome comment="QoS: queue-download-tcp-big"
 
-add name=queue-download-udp-smaller packet-mark=pack-udp-smaller parent=queue-download-udp priority=1 queue=FqCoDelHome comment="QoS: queue-download-udp-smaller"
-add name=queue-download-udp-small packet-mark=pack-udp-small parent=queue-download-udp priority=3 queue=FqCoDelHome comment="QoS: queue-download-udp-small"
-add name=queue-download-udp-normal packet-mark=pack-udp-normal parent=queue-download-udp priority=5 queue=FqCoDelHome comment="QoS: queue-download-udp-normal"
-add name=queue-download-udp-big packet-mark=pack-udp-big parent=queue-download-udp priority=7 queue=FqCoDelHome comment="QoS: queue-download-udp-big"
+add name=queue-download-udp-smaller packet-mark=pack-udp-smaller parent=queue-download-udp priority=1 queue=CakeHome comment="QoS: queue-download-udp-smaller"
+add name=queue-download-udp-small packet-mark=pack-udp-small parent=queue-download-udp priority=3 queue=CakeHome comment="QoS: queue-download-udp-small"
+add name=queue-download-udp-normal packet-mark=pack-udp-normal parent=queue-download-udp priority=5 queue=CakeHome comment="QoS: queue-download-udp-normal"
+add name=queue-download-udp-big packet-mark=pack-udp-big parent=queue-download-udp priority=7 queue=CakeHome comment="QoS: queue-download-udp-big"
 
-add name=queue-upload-icmp packet-mark=pack-icmp parent=queue-upload priority=2 queue=FqCoDelHome comment="QoS: queue-upload-icmp"
-add name=queue-upload-tcp parent=queue-upload queue=FqCoDelHome comment="QoS: queue-upload-tcp"
-add name=queue-upload-udp parent=queue-upload priority=7 queue=FqCoDelHome comment="QoS: queue-upload-udp"
+add name=queue-upload-icmp packet-mark=pack-icmp parent=queue-upload priority=2 queue=CakeHome comment="QoS: queue-upload-icmp"
+add name=queue-upload-tcp parent=queue-upload queue=CakeHome comment="QoS: queue-upload-tcp"
+add name=queue-upload-udp parent=queue-upload priority=7 queue=CakeHome comment="QoS: queue-upload-udp"
 
-add name=queue-upload-tcp-smaller packet-mark=pack-tcp-smaller parent=queue-upload-tcp priority=2 queue=FqCoDelHome comment="QoS: queue-upload-tcp-smaller"
-add name=queue-upload-tcp-small packet-mark=pack-tcp-small parent=queue-upload-tcp priority=4 queue=FqCoDelHome comment="QoS: queue-upload-tcp-small"
-add name=queue-upload-tcp-normal packet-mark=pack-tcp-normal parent=queue-upload-tcp priority=6 queue=FqCoDelHome comment="QoS: queue-upload-tcp-normal"
-add name=queue-upload-tcp-big packet-mark=pack-tcp-big parent=queue-upload-tcp queue=FqCoDelHome comment="QoS: queue-upload-tcp-big"
+add name=queue-upload-tcp-smaller packet-mark=pack-tcp-smaller parent=queue-upload-tcp priority=2 queue=CakeHome comment="QoS: queue-upload-tcp-smaller"
+add name=queue-upload-tcp-small packet-mark=pack-tcp-small parent=queue-upload-tcp priority=4 queue=CakeHome comment="QoS: queue-upload-tcp-small"
+add name=queue-upload-tcp-normal packet-mark=pack-tcp-normal parent=queue-upload-tcp priority=6 queue=CakeHome comment="QoS: queue-upload-tcp-normal"
+add name=queue-upload-tcp-big packet-mark=pack-tcp-big parent=queue-upload-tcp queue=CakeHome comment="QoS: queue-upload-tcp-big"
 
-add name=queue-upload-udp-smaller packet-mark=pack-udp-smaller parent=queue-upload-udp priority=1 queue=FqCoDelHome comment="QoS: queue-upload-udp-smaller"
-add name=queue-upload-udp-small packet-mark=pack-udp-small parent=queue-upload-udp priority=3 queue=FqCoDelHome comment="QoS: queue-upload-udp-small"
-add name=queue-upload-udp-normal packet-mark=pack-udp-normal parent=queue-upload-udp priority=5 queue=FqCoDelHome comment="QoS: queue-upload-udp-normal"
-add name=queue-upload-udp-big packet-mark=pack-udp-big parent=queue-upload-udp priority=7 queue=FqCoDelHome comment="QoS: queue-upload-udp-big"
+add name=queue-upload-udp-smaller packet-mark=pack-udp-smaller parent=queue-upload-udp priority=1 queue=CakeHome comment="QoS: queue-upload-udp-smaller"
+add name=queue-upload-udp-small packet-mark=pack-udp-small parent=queue-upload-udp priority=3 queue=CakeHome comment="QoS: queue-upload-udp-small"
+add name=queue-upload-udp-normal packet-mark=pack-udp-normal parent=queue-upload-udp priority=5 queue=CakeHome comment="QoS: queue-upload-udp-normal"
+add name=queue-upload-udp-big packet-mark=pack-udp-big parent=queue-upload-udp priority=7 queue=CakeHome comment="QoS: queue-upload-udp-big"
+
+
