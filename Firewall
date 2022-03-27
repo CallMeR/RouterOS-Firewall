@@ -187,7 +187,7 @@ add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-i
 
 /queue type
 add cake-bandwidth=500M cake-diffserv=besteffort cake-mpu=84 cake-overhead=38 cake-overhead-scheme=ethernet cake-nat=yes cake-wash=yes kind=cake name=CakeDownload
-add cake-bandwidth=50M cake-diffserv=besteffort cake-mpu=84 cake-overhead=38 cake-overhead-scheme=ethernet cake-nat=yes cake-wash=yes kind=cake cake-ack-filter=filter name=CakeUpload
+add cake-bandwidth=50M cake-diffserv=besteffort cake-mpu=84 cake-overhead=38 cake-overhead-scheme=ethernet cake-nat=yes cake-wash=no kind=cake cake-ack-filter=filter name=CakeUpload
 
 /queue tree
 add max-limit=500M name=queue-download parent=bridge1 queue=CakeDownload comment="QoS: CAKE-total-queue-download"
