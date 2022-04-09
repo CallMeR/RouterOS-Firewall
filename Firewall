@@ -185,8 +185,8 @@ add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-u
 add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-icmp passthrough=yes protocol=icmp comment="QoS: mark-pack-icmp"
 
 /queue type
-add cake-bandwidth=500M cake-diffserv=besteffort cake-mpu=84 cake-overhead=38 cake-overhead-scheme=ethernet cake-nat=yes cake-wash=yes kind=cake name=CakeDownload
-add cake-bandwidth=50M cake-diffserv=besteffort cake-mpu=84 cake-overhead=38 cake-overhead-scheme=ethernet cake-nat=yes cake-wash=no kind=cake cake-ack-filter=filter name=CakeUpload
+add cake-bandwidth=500M cake-diffserv=diffserv4 cake-mpu=84 cake-overhead=38 cake-overhead-scheme=ethernet cake-nat=yes cake-wash=yes kind=cake name=CakeDownload
+add cake-bandwidth=50M cake-diffserv=diffserv4 cake-mpu=84 cake-overhead=38 cake-overhead-scheme=ethernet cake-nat=yes cake-wash=no kind=cake cake-ack-filter=filter name=CakeUpload
 
 /queue tree
 add max-limit=500M name=queue-download parent=bridge1 queue=CakeDownload comment="QoS: CAKE-total-queue-download"
@@ -219,4 +219,3 @@ add name=queue-upload-udp-smaller packet-mark=pack-udp-smaller parent=queue-uplo
 add name=queue-upload-udp-small packet-mark=pack-udp-small parent=queue-upload-udp priority=3 queue=CakeUpload comment="QoS: queue-upload-udp-small"
 add name=queue-upload-udp-normal packet-mark=pack-udp-normal parent=queue-upload-udp priority=5 queue=CakeUpload comment="QoS: queue-upload-udp-normal"
 add name=queue-upload-udp-big packet-mark=pack-udp-big parent=queue-upload-udp priority=7 queue=CakeUpload comment="QoS: queue-upload-udp-big"
-
