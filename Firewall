@@ -173,7 +173,7 @@ add action=drop chain=icmp4 comment="defconf: drop all other icmp" protocol=icmp
 ## QoS With CAKE
 
 /ip firewall mangle
-add action=mark-connection chain=prerouting new-connection-mark=Conn passthrough=yes src-address-list=home_address comment="QoS: mark-connection"
+add action=mark-connection chain=prerouting new-connection-mark=Conn passthrough=yes src-address-list=local_address comment="QoS: mark-connection"
 add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-tcp-smaller packet-size=0-256 passthrough=yes protocol=tcp comment="QoS: mark-pack-tcp-smaller"
 add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-tcp-small packet-size=257-512 passthrough=yes protocol=tcp comment="QoS: mark-pack-tcp-small"
 add action=mark-packet chain=forward connection-mark=Conn new-packet-mark=pack-tcp-normal packet-size=513-1024 passthrough=yes protocol=tcp comment="QoS: mark-pack-tcp-normal"
