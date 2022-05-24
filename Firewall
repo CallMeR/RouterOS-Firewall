@@ -66,8 +66,10 @@ add action=fasttrack-connection chain=forward comment="defconf: fasttrack" conne
 add action=accept chain=forward comment="defconf: fasttrack accept established,related" connection-state=established,related disabled=yes
 
 add action=drop chain=forward comment="defconf: drop invalid" connection-state=invalid
+
 add action=drop chain=forward comment="defconf: drop all from WAN not DSTNATed" connection-nat-state=!dstnat connection-state=new in-interface-list=WAN log=yes
 add action=drop chain=forward comment="modemconf: drop all from MODEM not DSTNATed" connection-nat-state=!dstnat connection-state=new in-interface-list=MODEM log=yes
+
 add action=drop chain=forward src-address-list=no_forward_ipv4 comment="defconf: drop bad forward IPs"
 add action=drop chain=forward dst-address-list=no_forward_ipv4 comment="defconf: drop bad forward IPs"
 
@@ -112,17 +114,20 @@ add action=drop chain=prerouting comment="defconf: drop bogon IP's" dst-address-
 
 add action=drop chain=prerouting comment="defconf: drop non global from WAN" src-address-list=not_global_ipv4 in-interface-list=WAN log=yes
 add action=drop chain=prerouting comment="defconf: drop forward to local lan from WAN" in-interface-list=WAN dst-address-list=local_address log=yes
+
+add action=drop chain=prerouting comment="modemconf: drop if not from modem IP" in-interface-list=MODEM src-address-list=!modem_address log=yes
+add action=drop chain=prerouting comment="modemconf: drop forward to local lan from MODEM" in-interface-list=MODEM dst-address-list=local_address log=yes
+
 add action=drop chain=prerouting comment="defconf: drop local if not from default IP range" in-interface-list=LAN src-address-list=!local_address
 
 add action=drop chain=prerouting comment="defconf: drop bad UDP" port=0 protocol=udp
+
 add action=jump chain=prerouting comment="defconf: jump to ICMP chain" jump-target=icmp4 protocol=icmp
 add action=jump chain=prerouting comment="defconf: jump to TCP chain" jump-target=bad_tcp protocol=tcp
+
 add action=accept chain=prerouting comment="defconf: accept everything else from LAN" in-interface-list=LAN
 add action=accept chain=prerouting comment="defconf: accept everything else from WAN" in-interface-list=WAN
-
-add action=drop chain=prerouting comment="modemconf: Drop UDP To Modem" protocol=udp in-interface-list=LAN dst-address-list=modem_address log=yes
-add action=accept chain=prerouting comment="modemconf: Accept TCP From Modem" protocol=tcp in-interface-list=MODEM src-address-list=modem_address
-add action=drop chain=prerouting comment="modemconf: Drop Others From Modem" in-interface-list=MODEM log=yes
+add action=accept chain=prerouting comment="modemconf: accept everything else from MODEM" in-interface-list=MODEM
 
 add action=drop chain=prerouting comment="defconf: drop the rest" log=yes
 
@@ -171,6 +176,7 @@ add action=drop chain=icmp4 comment="defconf: drop all other icmp" protocol=icmp
 /tool/mac-server/ping/set enabled=no
 
 /tool/bandwidth-server/set enabled=no
+
 
 ## QoS With CAKE
 
