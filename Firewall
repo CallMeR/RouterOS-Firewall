@@ -178,11 +178,14 @@ add action=drop chain=icmp4 comment="defconf: drop all other icmp" protocol=icmp
 /tool/bandwidth-server/set enabled=no
 
 
-## QoS With Fq_Codel
+## Simple Queue QoS With CAKE
 
 /queue type
-add fq-codel-quantum=1000 kind=fq-codel name=LocalFqCoDel
+add cake-diffserv=besteffort cake-flowmode=dual-dsthost cake-mpu=84 cake-overhead=38 cake-overhead-scheme=ethernet cake-nat=yes cake-wash=yes kind=cake name=CakeDownload
+add cake-diffserv=diffserv4  cake-flowmode=dual-srchost cake-mpu=84 cake-overhead=38 cake-overhead-scheme=ethernet cake-nat=yes cake-wash=no  kind=cake cake-ack-filter=filter name=CakeUpload
 
 /queue simple
-add comment="Local_QoS_With_FQ_CoDel" max-limit=500M/50M name=Fq_CoDel_QoS queue=LocalFqCoDel/LocalFqCoDel target=pppoe-out1 total-queue=LocalFqCoDel
+add comment="Local_QoS_With_CAKE" max-limit=500M/50M name=CAKE_QoS queue=CakeDownload/CakeUpload target=pppoe-out1
+
+
 
