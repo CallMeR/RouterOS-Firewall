@@ -181,11 +181,11 @@ add action=drop chain=icmp4 comment="defconf: drop all other icmp" protocol=icmp
 ## Simple Queue QoS With CAKE
 
 /queue type
-add cake-diffserv=besteffort cake-flowmode=dual-dsthost cake-mpu=84 cake-overhead=38 cake-overhead-scheme=ethernet cake-nat=yes cake-wash=yes kind=cake name=CakeDownload
-add cake-diffserv=diffserv4  cake-flowmode=dual-srchost cake-mpu=84 cake-overhead=38 cake-overhead-scheme=ethernet cake-nat=yes cake-wash=no  kind=cake cake-ack-filter=filter name=CakeUpload
+add cake-diffserv=besteffort cake-flowmode=dual-dsthost cake-overhead-scheme=ethernet cake-nat=yes cake-wash=yes kind=cake name=CakeDownload
+add cake-diffserv=diffserv4  cake-flowmode=dual-srchost cake-overhead-scheme=ethernet cake-nat=yes cake-wash=no  kind=cake cake-ack-filter=filter name=CakeUpload
 
 /queue simple
-add comment="Local_QoS_With_CAKE" max-limit=500M/50M name=CAKE_QoS queue=CakeDownload/CakeUpload target=pppoe-out1
+add comment="qosconf: simple queue with cake" max-limit=500M/50M name=CAKE_QoS queue=CakeDownload/CakeUpload target=pppoe-out1
 
 
 
