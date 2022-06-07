@@ -112,7 +112,7 @@ add action=drop chain=prerouting comment="defconf: drop bogon IP's" dst-address-
 add action=drop chain=prerouting comment="defconf: drop bogon IP's" src-address-list=bad_src_ipv4
 add action=drop chain=prerouting comment="defconf: drop bogon IP's" dst-address-list=bad_dst_ipv4
 
-add action=drop chain=prerouting comment="defconf: drop non global from WAN" src-address-list=not_global_ipv4 in-interface-list=WAN log=yes
+add action=drop chain=prerouting comment="defconf: drop non global from WAN" src-address-list=not_global_ipv4 in-interface-list=WAN
 add action=drop chain=prerouting comment="defconf: drop forward to local lan from WAN" in-interface-list=WAN dst-address-list=local_address log=yes
 
 add action=drop chain=prerouting comment="modemconf: drop if not from modem IP" in-interface-list=MODEM src-address-list=!modem_address log=yes
@@ -129,7 +129,7 @@ add action=accept chain=prerouting comment="defconf: accept everything else from
 add action=accept chain=prerouting comment="defconf: accept everything else from WAN" in-interface-list=WAN
 add action=accept chain=prerouting comment="modemconf: accept everything else from MODEM" in-interface-list=MODEM
 
-add action=drop chain=prerouting comment="defconf: drop the rest" log=yes
+add action=drop chain=prerouting comment="defconf: drop the rest"
 
 add action=drop chain=bad_tcp comment="defconf: TCP flag filter" protocol=tcp tcp-flags=!fin,!syn,!rst,!ack
 add action=drop chain=bad_tcp comment="defconf: tcp-flags=fin,syn" protocol=tcp tcp-flags=fin,syn
@@ -140,13 +140,13 @@ add action=drop chain=bad_tcp comment="defconf: tcp-flags=syn,rst" protocol=tcp 
 add action=drop chain=bad_tcp comment="defconf: tcp-flags=rst,urg" protocol=tcp tcp-flags=rst,urg
 add action=drop chain=bad_tcp comment="defconf: TCP port 0 drop" port=0 protocol=tcp
 
-add action=accept chain=icmp4 comment="modemconf: Accept echo reply from Modem" icmp-options=0:0 limit=5,10:packet protocol=icmp in-interface-list=MODEM
-add action=drop chain=icmp4 comment="modemconf: Drop other icmp from Modem" protocol=icmp in-interface-list=MODEM log=yes
-
 add action=accept chain=icmp4 comment="lanconf: Accept echo reply from WAN" icmp-options=0:0 limit=5,10:packet protocol=icmp in-interface-list=WAN
 add action=accept chain=icmp4 comment="lanconf: Accept time exceeded from WAN" icmp-options=11:0-255 protocol=icmp in-interface-list=WAN
 add action=accept chain=icmp4 comment="lanconf: Accept net unreachable from WAN" icmp-options=3:0 protocol=icmp in-interface-list=WAN
 add action=drop chain=icmp4 comment="lanconf: Drop other icmp from WAN" protocol=icmp in-interface-list=WAN
+
+add action=accept chain=icmp4 comment="modemconf: Accept echo reply from Modem" icmp-options=0:0 limit=5,10:packet protocol=icmp in-interface-list=MODEM
+add action=drop chain=icmp4 comment="modemconf: Drop other icmp from Modem" protocol=icmp in-interface-list=MODEM log=yes
 
 add action=accept chain=icmp4 comment="defconf: echo reply" icmp-options=0:0 limit=5,10:packet protocol=icmp in-interface-list=LAN log=yes
 add action=accept chain=icmp4 comment="defconf: net unreachable" icmp-options=3:0 protocol=icmp in-interface-list=LAN
