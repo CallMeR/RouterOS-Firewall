@@ -16,12 +16,12 @@ add interface=ether1 list=MODEM comment="modemconf: Access To Modem"
 
 /ip firewall address-list
 
-add address=192.168.100.1 comment="modemconf: Modem Address" list=modem_address
-add address=10.0.0.0/24 comment="lanconf: Local Address" list=local_address
+add address=192.168.100.1 comment="modemconf: Modem Address" list=modem_ipv4
+add address=10.0.0.0/24 comment="lanconf: Local Address" list=local_subnet_ipv4
 
-add address=10.0.0.1 comment="lanconf: Local DNS Address" list=local_dns_address
-add address=10.0.0.2 comment="lanconf: Local DNS Address" list=local_dns_address
-add address=10.0.0.3 comment="lanconf: Local DNS Address" list=local_dns_address
+add address=10.0.0.1 comment="lanconf: Local DNS Address" list=local_dns_ipv4
+add address=10.0.0.2 comment="lanconf: Local DNS Address" list=local_dns_ipv4
+add address=10.0.0.3 comment="lanconf: Local DNS Address" list=local_dns_ipv4
 
 add address=0.0.0.0/8 comment="defconf: RFC6890" list=no_forward_ipv4
 add address=169.254.0.0/16 comment="defconf: RFC6890" list=no_forward_ipv4
@@ -51,8 +51,8 @@ add address=255.255.255.255/32 comment="defconf: RFC6890" list=bad_src_ipv4
 add address=0.0.0.0/8 comment="defconf: RFC6890" list=bad_dst_ipv4
 add address=224.0.0.0/4 comment="defconf: RFC6890" list=bad_dst_ipv4
 
-add comment="ddosconf: DDoS" list=ddos_targets
-add comment="ddosconf: DDoS" list=ddos_attackers
+add comment="ddosconf: DDoS" list=ddos_targets_ipv4
+add comment="ddosconf: DDoS" list=ddos_attackers_ipv4
 
 
 /ip firewall filter
@@ -76,8 +76,8 @@ add action=drop chain=forward dst-address-list=no_forward_ipv4 comment="defconf:
 add action=jump chain=forward connection-state=new jump-target=detect_ddos comment="ddosconf: DDoS"
 add action=return chain=detect_ddos dst-limit=32,32,src-and-dst-addresses/10s protocol=tcp tcp-flags=syn,ack comment="ddosconf: SYN-ACK Flood" log=yes
 add action=return chain=detect_ddos dst-limit=64,128,src-and-dst-addresses/10s comment="ddosconf: DDoS"
-add action=add-dst-to-address-list chain=detect_ddos address-list=ddos_targets address-list-timeout=10m comment="ddosconf: DDoS" log=yes
-add action=add-src-to-address-list chain=detect_ddos address-list=ddos_attackers address-list-timeout=10m comment="ddosconf: DDoS" log=yes
+add action=add-dst-to-address-list chain=detect_ddos address-list=ddos_targets_ipv4 address-list-timeout=10m comment="ddosconf: DDoS" log=yes
+add action=add-src-to-address-list chain=detect_ddos address-list=ddos_attackers_ipv4 address-list-timeout=10m comment="ddosconf: DDoS" log=yes
 
 
 /ip firewall nat
@@ -85,25 +85,25 @@ add action=add-src-to-address-list chain=detect_ddos address-list=ddos_attackers
 add action=accept chain=srcnat comment="defconf: accept all that matches IPSec policy" ipsec-policy=out,ipsec disabled=yes
 add action=masquerade chain=srcnat comment="defconf: masquerade" out-interface-list=WAN
 
-add action=masquerade chain=srcnat out-interface-list=MODEM src-address-list=local_address dst-address-list=modem_address comment="modemconf: Access To Modem"
+add action=masquerade chain=srcnat out-interface-list=MODEM src-address-list=local_subnet_ipv4 dst-address-list=modem_ipv4 comment="modemconf: Access To Modem"
 
-add action=accept chain=dstnat dst-port=53 in-interface-list="LAN" protocol=udp src-address-list=local_dns_address comment="lanconf: Accept Local DNS Startup Query(UDP)" log=yes
-add action=accept chain=dstnat dst-port=53 in-interface-list="LAN" protocol=tcp src-address-list=local_dns_address comment="lanconf: Accept Local DNS Startup Query(TCP)" log=yes
+add action=accept chain=dstnat dst-port=53 in-interface-list="LAN" protocol=udp src-address-list=local_dns_ipv4 comment="lanconf: Accept Local DNS Startup Query(UDP)" log=yes
+add action=accept chain=dstnat dst-port=53 in-interface-list="LAN" protocol=tcp src-address-list=local_dns_ipv4 comment="lanconf: Accept Local DNS Startup Query(TCP)" log=yes
 
-add action=redirect chain=dstnat dst-address-list=!local_dns_address dst-port=53 in-interface-list="LAN" protocol=udp to-addresses=10.0.0.1 to-ports=53 comment="lanconf: DNS Redirect to DNS Server(UDP)"
-add action=redirect chain=dstnat dst-address-list=!local_dns_address dst-port=53 in-interface-list="LAN" protocol=tcp to-addresses=10.0.0.1 to-ports=53 comment="lanconf: DNS Redirect to DNS Server(TCP)"
+add action=redirect chain=dstnat dst-address-list=!local_dns_ipv4 dst-port=53 in-interface-list="LAN" protocol=udp to-addresses=10.0.0.1 to-ports=53 comment="lanconf: DNS Redirect to DNS Server(UDP)"
+add action=redirect chain=dstnat dst-address-list=!local_dns_ipv4 dst-port=53 in-interface-list="LAN" protocol=tcp to-addresses=10.0.0.1 to-ports=53 comment="lanconf: DNS Redirect to DNS Server(TCP)"
 
 
 /ip firewall mangle
 
-add action=accept chain=prerouting src-address-list=local_address dst-address-list=modem_address comment="modemconf: Access To Modem"
+add action=accept chain=prerouting src-address-list=local_subnet_ipv4 dst-address-list=modem_ipv4 comment="modemconf: Access To Modem"
 
 
 /ip firewall raw
 
 add action=accept chain=prerouting comment="defconf: enable for transparent firewall" disabled=yes
 
-add action=drop chain=prerouting dst-address-list=ddos_targets src-address-list=ddos_attackers comment="ddosconf: DDoS"
+add action=drop chain=prerouting dst-address-list=ddos_targets_ipv4 src-address-list=ddos_attackers_ipv4 comment="ddosconf: DDoS"
 
 add action=accept chain=prerouting comment="defconf: accept DHCP discover" dst-address=255.255.255.255 dst-port=67 in-interface-list=LAN protocol=udp src-address=0.0.0.0 src-port=68
 
@@ -113,12 +113,12 @@ add action=drop chain=prerouting comment="defconf: drop bogon IP's" src-address-
 add action=drop chain=prerouting comment="defconf: drop bogon IP's" dst-address-list=bad_dst_ipv4
 
 add action=drop chain=prerouting comment="defconf: drop non global from WAN" src-address-list=not_global_ipv4 in-interface-list=WAN
-add action=drop chain=prerouting comment="defconf: drop forward to local lan from WAN" in-interface-list=WAN dst-address-list=local_address log=yes
+add action=drop chain=prerouting comment="defconf: drop forward to local lan from WAN" in-interface-list=WAN dst-address-list=local_subnet_ipv4 log=yes
 
-add action=drop chain=prerouting comment="modemconf: drop if not from modem IP" in-interface-list=MODEM src-address-list=!modem_address log=yes
-add action=drop chain=prerouting comment="modemconf: drop forward to local lan from MODEM" in-interface-list=MODEM dst-address-list=local_address log=yes
+add action=drop chain=prerouting comment="modemconf: drop if not from modem IP" in-interface-list=MODEM src-address-list=!modem_ipv4 log=yes
+add action=drop chain=prerouting comment="modemconf: drop forward to local lan from MODEM" in-interface-list=MODEM dst-address-list=local_subnet_ipv4 log=yes
 
-add action=drop chain=prerouting comment="defconf: drop local if not from default IP range" in-interface-list=LAN src-address-list=!local_address
+add action=drop chain=prerouting comment="defconf: drop local if not from default IP range" in-interface-list=LAN src-address-list=!local_subnet_ipv4
 
 add action=drop chain=prerouting comment="defconf: drop bad UDP" port=0 protocol=udp
 
@@ -155,8 +155,8 @@ add action=accept chain=icmp4 comment="defconf: protocol unreachable" icmp-optio
 add action=accept chain=icmp4 comment="defconf: port unreachable" icmp-options=3:3 protocol=icmp in-interface-list=LAN
 add action=accept chain=icmp4 comment="defconf: fragmentation needed" icmp-options=3:4 protocol=icmp in-interface-list=LAN
 
-add action=accept chain=icmp4 comment="defconf: echo to Modem" icmp-options=8:0 limit=5,10:packet protocol=icmp in-interface-list=LAN dst-address-list=modem_address
-add action=accept chain=icmp4 comment="defconf: echo to Local Device" icmp-options=8:0 limit=5,10:packet protocol=icmp in-interface-list=LAN dst-address-list=local_address
+add action=accept chain=icmp4 comment="defconf: echo to Modem" icmp-options=8:0 limit=5,10:packet protocol=icmp in-interface-list=LAN dst-address-list=modem_ipv4
+add action=accept chain=icmp4 comment="defconf: echo to Local Device" icmp-options=8:0 limit=5,10:packet protocol=icmp in-interface-list=LAN dst-address-list=local_subnet_ipv4
 add action=drop chain=icmp4 comment="defconf: echo to Not Global" icmp-options=8:0 limit=5,10:packet protocol=icmp in-interface-list=LAN dst-address-list=not_global_ipv4
 add action=accept chain=icmp4 comment="defconf: echo to WAN" icmp-options=8:0 limit=5,10:packet protocol=icmp in-interface-list=LAN
 add action=accept chain=icmp4 comment="defconf: time exceeded" icmp-options=11:0-255 protocol=icmp in-interface-list=LAN
@@ -177,6 +177,7 @@ add action=drop chain=icmp4 comment="defconf: drop all other icmp" protocol=icmp
 /tool/mac-server/ping/set enabled=no
 
 /tool/bandwidth-server/set enabled=no
+
 
 ## Simple Queue QoS With CAKE
 
